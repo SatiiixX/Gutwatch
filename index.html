@@ -245,6 +245,34 @@ select option{background:var(--bg3);}
 .fup{animation:fup .25s ease forwards;}
 ::-webkit-scrollbar{width:0;}
 
+/* DASHBOARD */
+.dashboard-greeting{font-size:20px;font-weight:700;margin-bottom:14px;letter-spacing:-.3px;}
+.dashboard-greeting span{color:var(--accent);}
+.dash-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.dash-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.dash-stat:active{border-color:var(--accent);}
+.dash-stat-val{font-size:18px;font-weight:700;font-family:var(--mono);line-height:1.1;}
+.dash-stat-lbl{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.3px;text-transform:uppercase;}
+.dash-stat-trend{font-size:9px;margin-top:1px;}
+
+/* DRINK WIDGET */
+.drink-progress{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.drink-progress-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .6s ease;}
+.drink-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:500;background:var(--bg3);border:1px solid var(--border);cursor:pointer;transition:all .15s;}
+.drink-chip:active{background:var(--bg4);}
+.drink-type-btn{padding:8px 12px;border-radius:var(--rsm);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center;}
+.drink-type-btn.sel{border-color:var(--accent);background:rgba(88,166,255,.1);color:var(--accent);}
+.drink-type-btn:active{background:var(--bg4);}
+
+/* GEWICHT TAB */
+.weight-current-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.wstat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;text-align:center;}
+.wstat-val{font-size:20px;font-weight:700;font-family:var(--mono);}
+.wstat-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* HEUTE IM TAGEBUCH */
+.today-diary-highlight{background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(88,166,255,.02));border:1px solid rgba(88,166,255,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;}
+
 /* ONBOARDING */
 .onb{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
 .onb-logo{font-size:48px;margin-bottom:12px;}
@@ -266,60 +294,82 @@ select option{background:var(--bg3);}
   </div>
 
   <div id="pages">
-    <!-- PAGE 0: HEUTE -->
+    <!-- PAGE 0: DASHBOARD -->
     <div class="page act" id="p0">
+
+      <!-- KOMPAKT-HEADER -->
+      <div class="dashboard-greeting" id="dash-greeting"></div>
+
+      <!-- COMPACT STATS ROW -->
+      <div class="dash-stats-row" id="dash-stats-row"></div>
+
+      <!-- SYMPTOM PROMPT -->
       <div id="sym-prompt" style="display:none;margin-bottom:12px;">
         <div class="card" style="border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.04);">
           <div style="font-size:14px;font-weight:600;margin-bottom:5px;">📋 Symptome fehlen</div>
-          <div style="font-size:13px;color:var(--text2);margin-bottom:11px;" id="sym-prompt-text">Trage Symptome ein — GutWatch lernt deine Trigger.</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:11px;" id="sym-prompt-text">Trage Symptome ein.</div>
           <div id="sym-prompt-btns" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
         </div>
       </div>
-      <div class="sgrid" id="w-stats">
-        <div class="scard"><div class="sval" id="sw-kcal">—</div><div class="slbl">kcal heute</div></div>
-        <div class="scard"><div class="sval" id="sw-meals">0</div><div class="slbl">Mahlzeiten</div></div>
-        <div class="scard cc" id="sw-weight-card" onclick="openWeightModal()">
-          <div class="sval" id="sw-weight">—</div>
-          <div class="slbl">⚖️ Gewicht (kg)</div>
+
+      <!-- WASSER / TRINKEN WIDGET -->
+      <div class="card" id="w-drinks" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:600;">💧 Getränke heute</div>
+          <button class="btn bp bsm" onclick="openDrinkModal()">+ Trinken</button>
         </div>
-        <div class="scard"><div class="sval" id="sw-streak">0</div><div class="slbl">🔥 Streak</div></div>
+        <div id="drink-progress-wrap" style="margin-bottom:10px;"></div>
+        <div id="drink-today-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       </div>
-      <div class="card" id="w-kcal" style="padding:14px;margin-bottom:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
-          <span style="font-size:13px;font-weight:600;">Kalorien-Ziel</span>
-          <span id="kcal-lbl" style="font-size:12px;font-family:var(--mono);color:var(--text3);"></span>
-        </div>
-        <div style="height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin-bottom:9px;">
-          <div id="kcal-bar" style="height:100%;border-radius:5px;background:var(--accent);transition:width .6s;width:0%;"></div>
-        </div>
-        <div id="macro-mini" style="display:flex;gap:8px;"></div>
-      </div>
+
+      <!-- MORGEN-PROGNOSE -->
       <div id="w-risk" style="display:none;margin-bottom:12px;">
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">
             <div style="font-size:14px;font-weight:600;">Morgen-Prognose</div>
             <div class="tl tlg" id="risk-badge"><span class="tldot"></span><span id="risk-lbl">—</span></div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;">
-            <span>Verträglichkeitsrisiko</span><span id="risk-pct" style="font-family:var(--mono);"></span>
-          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;"><span>Verträglichkeitsrisiko</span><span id="risk-pct" style="font-family:var(--mono);"></span></div>
           <div class="rbwrap"><div class="rbar" id="rbar" style="width:0%"></div></div>
           <div id="risk-reason" style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.5;"></div>
         </div>
       </div>
+
+      <!-- INSIGHTS -->
       <div id="w-insights"></div>
+
+      <!-- FAVORITEN -->
       <div id="w-favs" style="margin-bottom:4px;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div class="stitle" style="margin:0;">Heute</div>
+
+      <!-- HEUTE — HERVORGEHOBEN -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="stitle" style="margin:0;">Heute</div>
+          <span id="today-date-badge" style="font-size:11px;font-family:var(--mono);color:var(--text3);padding:3px 8px;background:var(--bg3);border-radius:20px;"></span>
+        </div>
         <button class="btn bg bsm" id="planer-btn">📅 Planer</button>
       </div>
       <div id="today-meals"></div>
-    </div>
 
+    </div>
     <!-- PAGE 1: TAGEBUCH -->
     <div class="page" id="p1">
+      <!-- HEUTE SEKTION — hervorgehoben -->
+      <div style="background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(88,166,255,.02));border:1px solid rgba(88,166,255,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:16px;font-weight:700;color:var(--accent);">Heute</div>
+            <span id="diary-today-badge" style="font-size:11px;font-family:var(--mono);color:var(--text3);padding:2px 7px;background:var(--bg3);border-radius:20px;"></span>
+          </div>
+          <button class="btn bp bsm" id="diary-add-btn" style="font-size:12px;">+ Mahlzeit</button>
+        </div>
+        <div id="diary-today-meals"></div>
+        <div id="diary-today-kcal" style="font-size:12px;color:var(--text3);margin-top:8px;font-family:var(--mono);"></div>
+      </div>
+
+      <!-- RESTLICHE TAGE -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="stitle" style="margin:0;">Tagebuch</div>
+        <div class="stitle" style="margin:0;">Verlauf</div>
         <div class="seg" style="margin:0;width:auto;">
           <button class="seg-btn act" id="dl-btn">Liste</button>
           <button class="seg-btn" id="dc-btn">Kalender</button>
@@ -327,7 +377,6 @@ select option{background:var(--bg3);}
       </div>
       <div id="diary-content"></div>
     </div>
-
     <!-- PAGE 2: ANALYSE -->
     <div class="page" id="p2">
       <div class="stitle">Analyse</div>
@@ -335,28 +384,43 @@ select option{background:var(--bg3);}
         <button class="seg-btn act" data-t="trigger">Trigger</button>
         <button class="seg-btn" data-t="charts">Charts</button>
         <button class="seg-btn" data-t="nutrition">Nährwerte</button>
+        <button class="seg-btn" data-t="check">Prüfen</button>
       </div>
       <div id="acontent"></div>
     </div>
 
-    <!-- PAGE 3: PRÜFEN -->
+    <!-- PAGE 3: GEWICHT -->
     <div class="page" id="p3">
-      <div class="stitle">Gericht prüfen</div>
-      <div class="ssub">Verträglichkeit vorab einschätzen</div>
-      <div class="ig">
-        <label>Gericht oder Lebensmittel</label>
-        <div style="display:flex;gap:8px;">
-          <div class="sugg-wrap" style="flex:1;">
-            <input type="text" id="check-inp" placeholder="z.B. Weißwurst, Obatzda, Käsespätzle…" autocomplete="off">
-            <div class="sugg-list" id="check-sugg" style="display:none;"></div>
-          </div>
-          <button class="btn bp" id="check-btn" style="flex-shrink:0;">Prüfen</button>
-        </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="stitle" style="margin:0;">⚖️ Gewicht</div>
+        <button class="btn bp bsm" onclick="openWeightModal()">+ Eintragen</button>
       </div>
-      <div id="check-result"></div>
-      <div id="check-hist" style="margin-top:20px;"></div>
-    </div>
 
+      <!-- AKTUELLE WERTE -->
+      <div id="weight-current-card"></div>
+
+      <!-- CHART -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">
+          <div style="font-size:14px;font-weight:600;">Verlauf</div>
+          <div class="seg" style="margin:0;width:auto;">
+            <button class="seg-btn act" id="wc-7">7T</button>
+            <button class="seg-btn" id="wc-30">30T</button>
+            <button class="seg-btn" id="wc-all">Alle</button>
+          </div>
+        </div>
+        <div id="weight-chart-main"></div>
+      </div>
+
+      <!-- STATISTIKEN -->
+      <div id="weight-stats-card"></div>
+
+      <!-- EINTRÄGE LISTE -->
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:11px;">Einträge</div>
+        <div id="weight-entries-list"></div>
+      </div>
+    </div>
     <!-- PAGE 4: EINSTELLUNGEN -->
     <div class="page" id="p4">
       <div class="stitle">Einstellungen</div>
@@ -375,6 +439,7 @@ select option{background:var(--bg3);}
           <div><label>Protein (g)</label><input type="number" id="prot-inp" placeholder="150"></div>
           <div><label>Zielgewicht (kg)</label><input type="number" id="goal-weight-inp" placeholder="75" step="0.1"></div>
           <div><label>Körpergröße (cm)</label><input type="number" id="height-inp" placeholder="175"></div>
+          <div><label>Wasserziel (ml/Tag)</label><input type="number" id="water-goal-inp" placeholder="2500"></div>
         </div>
         <button class="btn bp bsm bfull" id="save-goals">Ziele speichern</button>
       </div>
@@ -427,10 +492,10 @@ select option{background:var(--bg3);}
   </div>
 
   <nav id="nav">
-    <button class="ni act" data-pg="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Heute</button>
+    <button class="ni act" data-pg="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
     <button class="ni" data-pg="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Tagebuch</button>
     <button class="ni" data-pg="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analyse</button>
-    <button class="ni" data-pg="3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Prüfen</button>
+    <button class="ni" data-pg="3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>Gewicht</button>
     <button class="ni" data-pg="4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>Profil</button>
   </nav>
 </div>
@@ -528,6 +593,68 @@ select option{background:var(--bg3);}
     <div id="planer-slots"></div>
     <div id="planer-sum" style="margin-top:12px;"></div>
     <button class="btn bg bfull" style="margin-top:10px;" onclick="closeM('m-planer')">Schließen</button>
+  </div>
+</div>
+
+<!-- MODAL: GETRÄNK -->
+<div class="mo" id="m-drink">
+  <div class="md">
+    <div class="mhandle"></div>
+    <div class="mtitle">💧 Getränk eintragen</div>
+    <div class="ig">
+      <label>Getränk wählen</label>
+      <div id="drink-quick-btns" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;"></div>
+    </div>
+    <div class="ig">
+      <label>Menge (ml)</label>
+      <input type="number" id="drink-ml-inp" placeholder="500" step="50" style="font-size:20px;font-weight:700;text-align:center;">
+    </div>
+    <div id="drink-selected-info" style="font-size:13px;color:var(--text2);padding:10px;background:var(--bg3);border-radius:var(--rsm);margin-bottom:14px;display:none;"></div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn bg bfull" onclick="closeM('m-drink')">Abbrechen</button>
+      <button class="btn bp bfull" id="drink-save-btn">Speichern</button>
+    </div>
+    <div class="div"></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:9px;">Getränke verwalten</div>
+    <div id="drink-db-list" style="margin-bottom:9px;"></div>
+    <button class="btn bg bfull bsm" id="add-drink-type-btn">+ Neues Getränk anlegen</button>
+  </div>
+</div>
+
+<!-- MODAL: GETRÄNK ANLEGEN -->
+<div class="mo" id="m-drink-type">
+  <div class="md">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="m-drink-type-title">Getränk anlegen</div>
+    <div class="ig"><label>Name</label><input type="text" id="dt-name" placeholder="z.B. Paulaner Spezi"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="ig">
+      <div><label>kcal / 100ml</label><input type="number" id="dt-kcal" placeholder="37"></div>
+      <div><label>Zucker (g/100ml)</label><input type="number" id="dt-sugar" placeholder="9.2" step="0.1"></div>
+      <div><label>Standardmenge (ml)</label><input type="number" id="dt-ml" placeholder="500"></div>
+      <div><label>Kategorie</label>
+        <select id="dt-cat">
+          <option value="wasser">💧 Wasser</option>
+          <option value="softdrink">🥤 Softdrink</option>
+          <option value="saft">🍊 Saft</option>
+          <option value="kaffee">☕ Kaffee/Tee</option>
+          <option value="alkohol">🍺 Alkohol</option>
+          <option value="sport">⚡ Sport</option>
+          <option value="sonstiges">🫙 Sonstiges</option>
+        </select>
+      </div>
+    </div>
+    <div class="ig">
+      <label>Histamin-Hinweis</label>
+      <select id="dt-hist">
+        <option value="low">Niedrig / unbedenklich</option>
+        <option value="medium">Mittel — mit Vorsicht</option>
+        <option value="high">Hoch — meiden</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn bg bfull" onclick="closeM('m-drink-type');openM('m-drink');">Abbrechen</button>
+      <button class="btn bp bfull" id="dt-save-btn">Speichern</button>
+    </div>
   </div>
 </div>
 
@@ -898,7 +1025,7 @@ function goTo(idx) {
   if (idx === 0) renderToday();
   if (idx === 1) renderDiary();
   if (idx === 2) renderAnalysis();
-  if (idx === 3) renderCheckHist();
+  if (idx === 3) renderWeightTab();
   if (idx === 4) renderSettings();
 }
 
@@ -1246,38 +1373,68 @@ function generateInsights() {
 // ═══════════════════════════════════════════
 function renderToday() {
   // Widget visibility
-  document.getElementById('w-stats').style.display = widgets.stats !== false ? '' : 'none';
-  document.getElementById('w-kcal').style.display = widgets.kcal !== false ? '' : 'none';
+  document.getElementById('w-insights').style.display = widgets.insights !== false ? '' : 'none';
+
+  // ── GREETING
+  const greet = document.getElementById('dash-greeting');
+  if (greet) {
+    const h = new Date().getHours();
+    const time = h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend';
+    const dow = new Date().toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long'});
+    greet.innerHTML = `${time} 👋<br><span style="font-size:13px;font-weight:400;color:var(--text3);">${dow}</span>`;
+  }
 
   const tm = meals.filter(m => m.date === todayStr());
-  document.getElementById('sw-meals').textContent = tm.length;
-  document.getElementById('sw-streak').textContent = calcStreak();
-  // Weight card
-  const todayWeight = weightLog.find(e => e.date === todayStr())
-    || (weightLog.length ? weightLog[weightLog.length-1] : null);
-  document.getElementById('sw-weight').textContent = todayWeight ? todayWeight.kg : '—';
-  const totalKcal = tm.reduce((a,m) => a + (m.nutrition?.kcal||0), 0);
-  document.getElementById('sw-kcal').textContent = totalKcal || '—';
-
-  // Kcal bar
+  const totalKcal = tm.reduce((a,m) => a+(m.nutrition?.kcal||0), 0);
+  const drinkKcal = getTodayDrinkKcal();
+  const totalKcalAll = totalKcal + drinkKcal;
   const goal = settings.kcal || 2000;
-  const pct = Math.min(110, Math.round((totalKcal/goal)*100));
-  document.getElementById('kcal-bar').style.width = Math.min(100,pct) + '%';
-  document.getElementById('kcal-bar').style.background = pct > 110 ? 'var(--red)' : pct > 90 ? 'var(--yellow)' : 'var(--accent)';
-  document.getElementById('kcal-lbl').textContent = totalKcal ? `${totalKcal} / ${goal} kcal` : 'Noch keine Kalorien';
 
-  // Macro mini
-  const totP = tm.reduce((a,m) => a+(m.nutrition?.protein||0), 0);
-  const totC = tm.reduce((a,m) => a+(m.nutrition?.carbs||0), 0);
-  const totF = tm.reduce((a,m) => a+(m.nutrition?.fat||0), 0);
-  const mm = document.getElementById('macro-mini');
-  if (totalKcal && mm) {
-    mm.innerHTML = [['P',totP,settings.protein||150,'var(--accent)'],['C',totC,300,'var(--yellow)'],['F',totF,80,'var(--purple)']].map(([l,v,mx,c]) => `
-      <div style="flex:1;"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">${l}: ${v}g</div>
-      <div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="width:${Math.min(100,Math.round(v/mx*100))}%;height:100%;background:${c};border-radius:2px;"></div></div></div>`).join('');
-  } else if (mm) mm.innerHTML = '';
+  // ── COMPACT STATS ROW (4 tiles)
+  const statsRow = document.getElementById('dash-stats-row');
+  if (statsRow) {
+    const latestW = weightLog.length ? weightLog[weightLog.length-1] : null;
+    const prevW = weightLog.length >= 2 ? weightLog[weightLog.length-2] : null;
+    const wTrend = latestW && prevW ? Math.round((latestW.kg - prevW.kg)*10)/10 : null;
+    const wTrendStr = wTrend !== null ? (wTrend > 0 ? `▲${wTrend}` : wTrend < 0 ? `▼${Math.abs(wTrend)}` : '→') : '';
+    const wTrendCol = wTrend !== null ? (wTrend < 0 ? 'var(--green)' : wTrend > 0 ? 'var(--red)' : 'var(--text3)') : 'var(--text3)';
+    const totalWaterMl = getTodayDrinks().reduce((s,e)=>s+e.ml,0);
+    const waterGoal = settings.waterGoalMl || 2500;
+    const waterPct = Math.min(100, Math.round(totalWaterMl/waterGoal*100));
+    const streak = calcStreak();
+    const kcalPct = Math.min(100, Math.round(totalKcalAll/goal*100));
 
-  // Risk
+    statsRow.innerHTML = `
+      <div class="dash-stat" onclick="goTo(1)">
+        <div class="dash-stat-val" style="color:var(--orange);">${totalKcalAll||'—'}</div>
+        <div class="dash-stat-lbl">kcal</div>
+        <div class="dash-stat-trend" style="color:${kcalPct>110?'var(--red)':kcalPct>90?'var(--yellow)':'var(--text3)'};">${totalKcalAll?kcalPct+'%':''}</div>
+      </div>
+      <div class="dash-stat" onclick="goTo(3)">
+        <div class="dash-stat-val" style="color:${latestW?'var(--text)':'var(--text3)'};">${latestW?latestW.kg:'—'}</div>
+        <div class="dash-stat-lbl">kg</div>
+        <div class="dash-stat-trend" style="color:${wTrendCol};">${wTrendStr}</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val" style="color:${waterPct>=100?'var(--green)':waterPct>=60?'var(--accent)':'var(--yellow)'};">${Math.round(totalWaterMl/100)/10||'0'}L</div>
+        <div class="dash-stat-lbl">Wasser</div>
+        <div class="dash-stat-trend" style="color:var(--text3);">${waterPct}%</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val">${streak}</div>
+        <div class="dash-stat-lbl">Streak</div>
+        <div class="dash-stat-trend">🔥</div>
+      </div>`;
+  }
+
+  // ── TODAY DATE BADGE
+  const badge = document.getElementById('today-date-badge');
+  if (badge) badge.textContent = new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // ── DRINK WIDGET
+  renderDrinkWidget();
+
+  // ── RISK
   const scored = tm.filter(m => m.riskScore != null);
   const rw = document.getElementById('w-risk');
   if (scored.length && widgets.risk !== false) {
@@ -1291,47 +1448,41 @@ function renderToday() {
     else { rb.className='tl tlr'; document.getElementById('risk-lbl').textContent='Hoch'; document.getElementById('rbar').style.background='var(--red)'; }
     const hi = tm.filter(m => m.risk === 'high').map(m => m.name);
     document.getElementById('risk-reason').textContent = hi.length ? `Achtung: ${hi.join(', ')} — hohes Histamin.` : 'Heutige Mahlzeiten zeigen moderate Verträglichkeit.';
-  } else { rw.style.display = 'none'; }
+  } else { if(rw) rw.style.display = 'none'; }
 
-  // Insights
+  // ── INSIGHTS
   const wi = document.getElementById('w-insights');
   if (widgets.insights !== false) {
-    wi.innerHTML = generateInsights().map(i => `<div class="insight${i.type==='warn'?' warn':i.type==='ok'?' ok':''}"><div class="insight-icon">${i.icon}</div><div class="insight-title">${i.title}</div><div class="insight-text">${i.text}</div></div>`).join('');
-  } else wi.innerHTML = '';
+    wi.innerHTML = generateInsights().map(i => `<div class="insight${i.type==='warn'?' warn':i.type==='ok'?' ok':''}" ><div class="insight-icon">${i.icon}</div><div class="insight-title">${i.title}</div><div class="insight-text">${i.text}</div></div>`).join('');
+  }
 
-  // Favs
+  // ── FAVS
   const wf = document.getElementById('w-favs');
   if (widgets.favs !== false && favorites.length) {
-    wf.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">⭐ Häufige Mahlzeiten</div><div>${favorites.slice(0,5).map(f => `<div class="fav-chip" onclick="quickFav('${f.replace(/'/g,"\\'")}')" >⭐ ${f}</div>`).join('')}</div>`;
-  } else wf.innerHTML = '';
+    wf.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">⭐ Häufige Mahlzeiten</div><div>${favorites.slice(0,5).map(f => `<div class="fav-chip" onclick="quickFav('${f.replace(/'/g,"\'")}')" >⭐ ${f}</div>`).join('')}</div>`;
+  } else if(wf) wf.innerHTML = '';
 
-  // Symptom prompt: zeige Buttons für alle Tage der letzten 3 Tage ohne Symptome
+  // ── SYMPTOM PROMPT
   const promptBtns = document.getElementById('sym-prompt-btns');
   const promptText = document.getElementById('sym-prompt-text');
   const missingDays = [];
   for (let i = 1; i <= 3; i++) {
-    const d = new Date(); d.setDate(d.getDate() - i);
+    const d = new Date(); d.setDate(d.getDate()-i);
     const ds = d.toISOString().slice(0,10);
     if (meals.some(m => m.date === ds) && !hasSym(ds)) missingDays.push(ds);
   }
-  // Auch heute: für Mahlzeiten von heute können Symptome für morgen geplant werden
-  // -> Zeige "Symptome für morgen vormerken" wenn heute Mahlzeiten vorhanden
   const hasTodayMeals = meals.some(m => m.date === todayStr());
-
   if (missingDays.length > 0 || hasTodayMeals) {
     document.getElementById('sym-prompt').style.display = 'block';
     let btnsHtml = '';
     missingDays.forEach(ds => {
       const lbl = ds === yesterStr() ? 'Gestern' : fmtDate(ds);
-      btnsHtml += `<button class="btn bp bsm" onclick="openSymModal('${ds}')" style="font-size:12px;">📋 ${lbl} eintragen</button>`;
+      btnsHtml += `<button class="btn bp bsm" onclick="openSymModal('${ds}')" style="font-size:12px;">📋 ${lbl}</button>`;
     });
     if (hasTodayMeals) {
       const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
       const tomorrowStr = tomorrow.toISOString().slice(0,10);
-      const alreadyHasTomorrow = hasSym(tomorrowStr);
-      if (!alreadyHasTomorrow) {
-        btnsHtml += `<button class="btn bg bsm" onclick="openSymModal('${tomorrowStr}', '${todayStr()}')" style="font-size:12px;">🔮 Morgen vormerken</button>`;
-      }
+      if (!hasSym(tomorrowStr)) btnsHtml += `<button class="btn bg bsm" onclick="openSymModal('${tomorrowStr}','${todayStr()}')" style="font-size:12px;">🔮 Morgen</button>`;
     }
     if (promptBtns) promptBtns.innerHTML = btnsHtml;
     if (promptText) promptText.textContent = missingDays.length > 0 ? 'Für diese Tage fehlen noch Symptome:' : 'Heutige Mahlzeiten — Symptome für morgen vormerken:';
@@ -1339,7 +1490,7 @@ function renderToday() {
     document.getElementById('sym-prompt').style.display = 'none';
   }
 
-  // Meals list
+  // ── MEALS TODAY
   const c = document.getElementById('today-meals');
   if (!tm.length) {
     c.innerHTML = `<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><h3>Noch keine Mahlzeiten heute</h3><p>Tippe auf + um deine erste Mahlzeit hinzuzufügen</p></div>`;
@@ -1348,6 +1499,7 @@ function renderToday() {
   c.innerHTML = tm.map(mealCard).join('');
   bindCards();
 }
+
 
 function quickFav(name) {
   editId = null; pendingResult = null;
@@ -1392,7 +1544,7 @@ document.getElementById('add-btn').onclick = () => {
 };
 
 document.getElementById('mi-name').addEventListener('input', function() { showSugg(this.value, 'mi-sugg', v => this.value = v); });
-document.getElementById('check-inp').addEventListener('input', function() { showSugg(this.value, 'check-sugg', v => this.value = v); });
+// check-inp is dynamic — wired in checkTab()
 
 document.getElementById('mi-fav-btn').onclick = () => {
   const name = document.getElementById('mi-name').value.trim();
@@ -1590,27 +1742,53 @@ document.getElementById('dl-btn').onclick = () => { diaryMode='list'; document.g
 document.getElementById('dc-btn').onclick = () => { diaryMode='calendar'; document.getElementById('dc-btn').className='seg-btn act'; document.getElementById('dl-btn').className='seg-btn'; renderDiary(); };
 
 function renderDiary() {
+  // ── HEUTE section at top of Tagebuch
+  const todayBadge = document.getElementById('diary-today-badge');
+  if (todayBadge) todayBadge.textContent = new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const addBtn = document.getElementById('diary-add-btn');
+  if (addBtn) addBtn.onclick = () => document.getElementById('add-btn').click();
+
+  const todayMeals = meals.filter(m => m.date === todayStr());
+  const dtm = document.getElementById('diary-today-meals');
+  if (dtm) {
+    if (!todayMeals.length) {
+      dtm.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0;">Noch keine Mahlzeiten heute — tippe auf + Mahlzeit</div>`;
+    } else {
+      dtm.innerHTML = todayMeals.map(mealCard).join('');
+      dtm.querySelectorAll('[data-mid]').forEach(c => c.onclick = () => openDetail(c.dataset.mid));
+    }
+  }
+  const dtkc = document.getElementById('diary-today-kcal');
+  if (dtkc) {
+    const kc = todayMeals.reduce((a,m)=>a+(m.nutrition?.kcal||0),0);
+    const dk = getTodayDrinkKcal();
+    dtkc.textContent = (kc||dk) ? `${kc} kcal Essen${dk?` + ${dk} kcal Getränke = ${kc+dk} kcal gesamt`:''}` : '';
+  }
+
+  // ── VERLAUF (past days)
   const c = document.getElementById('diary-content');
-  if (!meals.length) { c.innerHTML = `<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><h3>Noch keine Einträge</h3></div>`; return; }
+  const pastMeals = meals.filter(m => m.date !== todayStr());
+  if (!pastMeals.length) { c.innerHTML = `<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><h3>Keine vergangenen Einträge</h3></div>`; return; }
   if (diaryMode === 'calendar') { renderCalendar(c); return; }
   const grp = {};
-  meals.forEach(m => { if (!grp[m.date]) grp[m.date]=[]; grp[m.date].push(m); });
+  pastMeals.forEach(m => { if (!grp[m.date]) grp[m.date]=[]; grp[m.date].push(m); });
   const dates = Object.keys(grp).sort((a,b) => b.localeCompare(a));
   let html = '';
   dates.forEach(date => {
-    const lbl = date===todayStr()?'Heute':date===yesterStr()?'Gestern':fmtDate(date);
+    const lbl = date===yesterStr()?'Gestern':fmtDate(date);
     const sym = symptoms.find(s => s.date === date);
     const sc = sym?.totalScore;
     const stag = sym
       ? `<span class="tag" style="font-size:10px;color:${sc<=2?'var(--green)':sc<=8?'var(--yellow)':'var(--red)'};">Sym ${sc}/24</span>`
       : (()=>{const _nd=new Date(date+'T12:00:00');_nd.setDate(_nd.getDate()+1);const _nds=_nd.toISOString().slice(0,10);return `<span class="tag" style="font-size:10px;cursor:pointer;" onclick="openSymModal('${_nds}','${date}')">+ Sym Folgetag</span>`;})();
-    const dayKcal = grp[date].reduce((a,m) => a+(m.nutrition?.kcal||0), 0);
+    const dayKcal = grp[date].reduce((a,m)=>a+(m.nutrition?.kcal||0),0);
     const kt = dayKcal ? `<span style="font-size:10px;color:var(--text3);font-family:var(--mono);">${dayKcal}kcal</span>` : '';
     html += `<div class="dh">${lbl} ${stag} ${kt}</div>`;
     grp[date].forEach(m => html += mealCard(m));
   });
   c.innerHTML = html; bindCards();
 }
+
 
 function renderCalendar(c) {
   const now = new Date(); const cells = [];
@@ -1655,10 +1833,30 @@ document.getElementById('atabs').querySelectorAll('.seg-btn').forEach(btn => {
 
 function renderAnalysis() {
   const c = document.getElementById('acontent');
+  if (atab === 'check') { checkTab(c); return; }
   if (!meals.length) { c.innerHTML = `<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>Noch keine Daten</h3><p>Tracke mindestens 3–5 Tage für Auswertungen.</p></div>`; return; }
   if (atab === 'trigger') triggerTab(c);
   else if (atab === 'charts') chartsTab(c);
   else nutritionTab(c);
+}
+
+function checkTab(c) {
+  c.innerHTML = `
+    <div style="margin-bottom:14px;">
+      <label style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px;display:block;">Gericht oder Lebensmittel</label>
+      <div style="display:flex;gap:8px;">
+        <div class="sugg-wrap" style="flex:1;">
+          <input type="text" id="check-inp" placeholder="z.B. Weißwurst, Obatzda, Schokohörnchen…" autocomplete="off">
+          <div class="sugg-list" id="check-sugg" style="display:none;"></div>
+        </div>
+        <button class="btn bp" id="check-btn" style="flex-shrink:0;">Prüfen</button>
+      </div>
+    </div>
+    <div id="check-result"></div>
+    <div id="check-hist" style="margin-top:20px;"></div>`;
+  document.getElementById('check-inp').addEventListener('input', function() { showSugg(this.value,'check-sugg',v=>this.value=v); });
+  // check-btn is dynamic — wired in checkTab()
+  renderCheckHist();
 }
 
 function triggerTab(c) {
@@ -1843,7 +2041,7 @@ function donut(vals, cols) {
 // ═══════════════════════════════════════════
 // CHECK PAGE
 // ═══════════════════════════════════════════
-document.getElementById('check-btn').onclick = checkDish;
+// check-btn is dynamic — wired in checkTab()
 async function checkDish() {
   const text = document.getElementById('check-inp').value.trim();
   if (!text) { toast('Bitte Gericht eingeben','err'); return; }
@@ -1970,9 +2168,11 @@ function renderSettings() {
   // Don't prefill input with key for security
   document.getElementById('api-inp').value = '';
   document.getElementById('api-inp').placeholder = k ? '••••••••••••••••••••' : 'AIzaSy…';
-  renderWidgetCfg(); renderBrands(); renderWeightHistory();
+  renderWidgetCfg(); renderBrands();
   document.getElementById('goal-weight-inp').value = settings.goalWeight || '';
   document.getElementById('height-inp').value = settings.height || '';
+  const wgi = document.getElementById('water-goal-inp');
+  if (wgi) wgi.value = settings.waterGoalMl || 2500;
 }
 document.getElementById('dark-tog').onclick = () => { settings.dark=!settings.dark; DB.set('settings',settings); applyTheme(); };
 document.getElementById('sym-rem-tog').onclick = function() { settings.symRem=!settings.symRem; DB.set('settings',settings); this.className='toggle'+(settings.symRem?' on':''); };
@@ -1981,11 +2181,13 @@ document.getElementById('save-goals').onclick = () => {
   settings.protein = +document.getElementById('prot-inp').value || 150;
   const gw = parseFloat(document.getElementById('goal-weight-inp').value);
   const ht = parseFloat(document.getElementById('height-inp').value);
+  const wg = parseFloat(document.getElementById('water-goal-inp')?.value);
   if (gw && gw > 20 && gw < 300) settings.goalWeight = gw;
   if (ht && ht > 100 && ht < 250) settings.height = ht;
+  if (wg && wg >= 500 && wg <= 6000) settings.waterGoalMl = wg;
   DB.set('settings', settings);
   toast('Ziele gespeichert ✓','ok');
-  renderWeightHistory();
+  renderToday();
 };
 document.getElementById('save-api').onclick = () => {
   const k = document.getElementById('api-inp').value.trim();
@@ -2038,7 +2240,7 @@ function renderWidgetCfg() {
 }
 
 document.getElementById('export-btn').onclick = () => {
-  const data = {meals,symptoms,triggers,brands,favorites,checkHist,weightLog,settings,widgets,exportDate:new Date().toISOString(),version:'3.1'};
+  const data = {meals,symptoms,triggers,brands,favorites,checkHist,weightLog,drinkLog,drinkDB,settings,widgets,exportDate:new Date().toISOString(),version:'4.0'};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'gutwatch_v3_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
@@ -2056,6 +2258,8 @@ document.getElementById('imp-file').onchange = e => {
       if (d.triggers) { triggers=d.triggers; DB.set('triggers',triggers); }
       if (d.brands) { brands=d.brands; DB.set('brands',brands); }
       if (d.weightLog) { weightLog=d.weightLog; DB.set('weightLog',weightLog); }
+      if (d.drinkLog) { drinkLog=d.drinkLog; DB.set('drinkLog',drinkLog); }
+      if (d.drinkDB) { drinkDB=d.drinkDB; DB.set('drinkDB',drinkDB); }
       if (d.favorites) { favorites=d.favorites; DB.set('favorites',favorites); }
       if (d.checkHist) { checkHist=d.checkHist; DB.set('checkHist',checkHist); }
       if (d.settings) { settings={...settings,...d.settings}; DB.set('settings',settings); }
@@ -2119,6 +2323,217 @@ document.getElementById('br-save').onclick = () => {
 };
 
 // ═══════════════════════════════════════════
+// GETRÄNKE-DATENBANK & TRACKING
+// ═══════════════════════════════════════════
+const DEFAULT_DRINKS = [
+  {id:'water',   name:'Wasser',              mlDefault:300, kcalPer100:0,   sugar:0,    cat:'wasser',   hist:'low',  emoji:'💧'},
+  {id:'kaffee',  name:'Kaffee',              mlDefault:200, kcalPer100:2,   sugar:0,    cat:'kaffee',   hist:'high', emoji:'☕'},
+  {id:'tee_gr',  name:'Grüner Tee',          mlDefault:250, kcalPer100:1,   sugar:0,    cat:'kaffee',   hist:'low',  emoji:'🍵'},
+  {id:'apfels',  name:'Apfelsaft',           mlDefault:200, kcalPer100:46,  sugar:10,   cat:'saft',     hist:'low',  emoji:'🍎'},
+  {id:'cola',    name:'Cola',                mlDefault:330, kcalPer100:42,  sugar:10.6, cat:'softdrink', hist:'medium',emoji:'🥤'},
+  {id:'bier',    name:'Bier',               mlDefault:500, kcalPer100:43,  sugar:0,    cat:'alkohol',  hist:'medium',emoji:'🍺'},
+  {id:'spezi',   name:'Paulaner Spezi',      mlDefault:500, kcalPer100:37,  sugar:9.2,  cat:'softdrink', hist:'medium',emoji:'🍊'},
+  {id:'ak',      name:'Öttinger Apfel Kirsch',mlDefault:500, kcalPer100:44, sugar:10.5, cat:'softdrink', hist:'medium',emoji:'🍒'},
+  {id:'ace',     name:'Öttinger ACE',        mlDefault:500, kcalPer100:12,  sugar:2.2,  cat:'softdrink', hist:'low',  emoji:'🍋'},
+];
+
+let drinkDB   = DB.get('drinkDB', null);
+if (!drinkDB) { drinkDB = DEFAULT_DRINKS; DB.set('drinkDB', drinkDB); }
+let drinkLog  = DB.get('drinkLog', []); // [{id, drinkId, ml, date, time}]
+let selectedDrinkId = null;
+let editDrinkTypeId = null;
+
+function getTodayDrinks() {
+  return drinkLog.filter(e => e.date === todayStr());
+}
+
+function getTodayWaterMl() {
+  // Sum all drinks (water counts fully, others count partially for hydration)
+  return getTodayDrinks().reduce((sum, e) => {
+    const d = drinkDB.find(x => x.id === e.drinkId);
+    const factor = d?.cat === 'alkohol' ? 0.5 : d?.cat === 'kaffee' ? 0.8 : 1.0;
+    return sum + (e.ml * factor);
+  }, 0);
+}
+
+function getTodayDrinkKcal() {
+  return getTodayDrinks().reduce((sum, e) => {
+    const d = drinkDB.find(x => x.id === e.drinkId);
+    return sum + Math.round((e.ml / 100) * (d?.kcalPer100 || 0));
+  }, 0);
+}
+
+function openDrinkModal() {
+  selectedDrinkId = null;
+  renderDrinkQuickBtns();
+  renderDrinkDBList();
+  document.getElementById('drink-ml-inp').value = '';
+  document.getElementById('drink-selected-info').style.display = 'none';
+  openM('m-drink');
+}
+
+function renderDrinkQuickBtns() {
+  const wrap = document.getElementById('drink-quick-btns');
+  if (!wrap) return;
+  wrap.innerHTML = drinkDB.map(d => `
+    <div class="drink-type-btn ${selectedDrinkId===d.id?'sel':''}" onclick="selectDrink('${d.id}')">
+      <div style="font-size:18px;">${d.emoji}</div>
+      <div style="font-size:11px;margin-top:2px;">${d.name}</div>
+      <div style="font-size:10px;color:var(--text3);">${d.kcalPer100?d.kcalPer100+'kcal/dl':'0 kcal'}</div>
+    </div>`).join('');
+}
+
+function selectDrink(id) {
+  selectedDrinkId = id;
+  const d = drinkDB.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('drink-ml-inp').value = d.mlDefault || 300;
+  const info = document.getElementById('drink-selected-info');
+  const kcal = Math.round((d.mlDefault / 100) * d.kcalPer100);
+  const histCol = d.hist==='high'?'var(--red)':d.hist==='medium'?'var(--yellow)':'var(--green)';
+  info.innerHTML = `<strong>${d.emoji} ${d.name}</strong> · ${d.mlDefault}ml · <span style="color:var(--orange);">${kcal} kcal</span> · Histamin: <span style="color:${histCol};">${d.hist}</span>`;
+  info.style.display = 'block';
+  renderDrinkQuickBtns();
+}
+
+document.getElementById('drink-ml-inp').addEventListener('input', function() {
+  if (!selectedDrinkId) return;
+  const d = drinkDB.find(x => x.id === selectedDrinkId);
+  if (!d) return;
+  const ml = parseFloat(this.value) || 0;
+  const kcal = Math.round((ml / 100) * d.kcalPer100);
+  const info = document.getElementById('drink-selected-info');
+  const histCol = d.hist==='high'?'var(--red)':d.hist==='medium'?'var(--yellow)':'var(--green)';
+  info.innerHTML = `<strong>${d.emoji} ${d.name}</strong> · ${ml}ml · <span style="color:var(--orange);">${kcal} kcal</span> · Histamin: <span style="color:${histCol};">${d.hist}</span>`;
+  info.style.display = 'block';
+});
+
+document.getElementById('drink-save-btn').onclick = () => {
+  if (!selectedDrinkId) { toast('Bitte Getränk auswählen','err'); return; }
+  const ml = parseFloat(document.getElementById('drink-ml-inp').value);
+  if (!ml || ml < 1) { toast('Bitte Menge eingeben','err'); return; }
+  const entry = {id:genId(), drinkId:selectedDrinkId, ml, date:todayStr(), time:new Date().toTimeString().slice(0,5), createdAt:new Date().toISOString()};
+  drinkLog.unshift(entry);
+  DB.set('drinkLog', drinkLog);
+  toast('Eingetragen ✓','ok');
+  closeM('m-drink');
+  renderToday();
+};
+
+function renderDrinkDBList() {
+  const wrap = document.getElementById('drink-db-list');
+  if (!wrap) return;
+  wrap.innerHTML = drinkDB.map(d => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:18px;">${d.emoji}</span>
+      <span style="flex:1;font-size:13px;">${d.name}</span>
+      <span style="font-size:12px;color:var(--text3);">${d.kcalPer100} kcal/dl</span>
+      <button class="bico" onclick="editDrinkType('${d.id}')" style="padding:5px;">✏️</button>
+      <button class="bico" onclick="deleteDrinkType('${d.id}')" style="padding:5px;color:var(--red);">✕</button>
+    </div>`).join('');
+}
+
+document.getElementById('add-drink-type-btn').onclick = () => {
+  editDrinkTypeId = null;
+  document.getElementById('m-drink-type-title').textContent = 'Getränk anlegen';
+  ['dt-name','dt-kcal','dt-sugar','dt-ml'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('dt-cat').value = 'softdrink';
+  document.getElementById('dt-hist').value = 'low';
+  closeM('m-drink'); openM('m-drink-type');
+};
+
+function editDrinkType(id) {
+  const d = drinkDB.find(x => x.id === id);
+  if (!d) return;
+  editDrinkTypeId = id;
+  document.getElementById('m-drink-type-title').textContent = 'Getränk bearbeiten';
+  document.getElementById('dt-name').value = d.name;
+  document.getElementById('dt-kcal').value = d.kcalPer100;
+  document.getElementById('dt-sugar').value = d.sugar || '';
+  document.getElementById('dt-ml').value = d.mlDefault;
+  document.getElementById('dt-cat').value = d.cat;
+  document.getElementById('dt-hist').value = d.hist;
+  closeM('m-drink'); openM('m-drink-type');
+}
+
+function deleteDrinkType(id) {
+  if (!confirm('Getränk löschen?')) return;
+  drinkDB = drinkDB.filter(x => x.id !== id);
+  DB.set('drinkDB', drinkDB);
+  renderDrinkDBList();
+  renderDrinkQuickBtns();
+  toast('Gelöscht');
+}
+
+document.getElementById('dt-save-btn').onclick = () => {
+  const name = document.getElementById('dt-name').value.trim();
+  if (!name) { toast('Bitte Name eingeben','err'); return; }
+  const cat = document.getElementById('dt-cat').value;
+  const catEmoji = {wasser:'💧',softdrink:'🥤',saft:'🍊',kaffee:'☕',alkohol:'🍺',sport:'⚡',sonstiges:'🫙'};
+  const drink = {
+    id: editDrinkTypeId || genId(),
+    name,
+    kcalPer100: parseFloat(document.getElementById('dt-kcal').value) || 0,
+    sugar: parseFloat(document.getElementById('dt-sugar').value) || 0,
+    mlDefault: parseFloat(document.getElementById('dt-ml').value) || 300,
+    cat,
+    hist: document.getElementById('dt-hist').value,
+    emoji: catEmoji[cat] || '🫙',
+  };
+  if (editDrinkTypeId) {
+    drinkDB = drinkDB.map(x => x.id === editDrinkTypeId ? drink : x);
+  } else {
+    drinkDB.push(drink);
+  }
+  DB.set('drinkDB', drinkDB);
+  editDrinkTypeId = null;
+  closeM('m-drink-type'); openM('m-drink');
+  renderDrinkDBList(); renderDrinkQuickBtns();
+  toast('Gespeichert ✓','ok');
+};
+
+function renderDrinkWidget() {
+  const todayEntries = getTodayDrinks();
+  const totalMl = getTodayDrinks().reduce((s,e) => s+e.ml, 0);
+  const waterGoal = settings.waterGoalMl || 2500;
+  const pct = Math.min(100, Math.round((totalMl / waterGoal) * 100));
+  const kcal = getTodayDrinkKcal();
+
+  const prog = document.getElementById('drink-progress-wrap');
+  if (prog) {
+    prog.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+        <span style="color:var(--text2);">${Math.round(totalMl)}ml von ${waterGoal}ml Ziel</span>
+        <span style="font-family:var(--mono);color:${pct>=100?'var(--green)':'var(--text3)'};">${pct}% ${pct>=100?'🎉':''}</span>
+      </div>
+      <div class="drink-progress"><div class="drink-progress-fill" style="width:${pct}%;background:${pct>=100?'var(--green)':pct>=60?'var(--accent)':'var(--yellow)'};"></div></div>
+      ${kcal>0?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">+${kcal} kcal aus Getränken</div>`:''}`;
+  }
+
+  const list = document.getElementById('drink-today-list');
+  if (list) {
+    if (!todayEntries.length) {
+      list.innerHTML = `<div style="font-size:13px;color:var(--text3);">Noch nichts eingetragen — tippe auf + Trinken</div>`;
+    } else {
+      list.innerHTML = todayEntries.slice(0,8).map(e => {
+        const d = drinkDB.find(x => x.id === e.drinkId);
+        return `<div class="drink-chip" onclick="deleteDrinkEntry('${e.id}')">
+          ${d?.emoji||'💧'} ${d?.name||'?'} <span style="color:var(--text3);">${e.ml}ml</span>
+          <span style="opacity:.4;font-size:10px;margin-left:2px;">✕</span>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function deleteDrinkEntry(id) {
+  drinkLog = drinkLog.filter(e => e.id !== id);
+  DB.set('drinkLog', drinkLog);
+  renderDrinkWidget();
+  renderToday();
+}
+
+// ═══════════════════════════════════════════
 // GEWICHT
 // ═══════════════════════════════════════════
 let weightLog = DB.get('weightLog', []); // [{id, date, kg, note}]
@@ -2180,6 +2595,147 @@ document.getElementById('weight-save-btn').onclick = () => {
   renderToday();
   if (curPg === 4) renderWeightHistory();
 };
+
+function renderWeightTab() {
+  renderWeightCurrentCard();
+  renderWeightChartMain('30');
+  renderWeightStatsCard();
+  renderWeightEntriesList();
+  // wire chart period buttons
+  ['7','30','all'].forEach(p => {
+    const btn = document.getElementById('wc-'+p);
+    if (btn) btn.onclick = () => {
+      ['7','30','all'].forEach(x => { const b=document.getElementById('wc-'+x); if(b) b.className='seg-btn'; });
+      btn.className = 'seg-btn act';
+      renderWeightChartMain(p);
+    };
+  });
+}
+
+function renderWeightCurrentCard() {
+  const card = document.getElementById('weight-current-card');
+  if (!card) return;
+  if (!weightLog.length) {
+    card.innerHTML = `<div class="card" style="text-align:center;padding:24px;"><div style="font-size:13px;color:var(--text3);">Noch keine Einträge.<br>Tippe auf + Eintragen um zu starten.</div></div>`;
+    return;
+  }
+  const latest = weightLog[weightLog.length-1];
+  const prev   = weightLog.length>=2 ? weightLog[weightLog.length-2] : null;
+  const bmi    = calcBMI(latest.kg);
+  const goal   = settings.goalWeight;
+  const cat    = bmi ? bmiCategory(bmi) : null;
+  const diff   = prev ? Math.round((latest.kg-prev.kg)*10)/10 : null;
+  const total  = weightLog.length>=2 ? Math.round((latest.kg-weightLog[0].kg)*10)/10 : null;
+
+  card.innerHTML = `<div class="card">
+    <div class="weight-current-grid">
+      <div class="wstat">
+        <div class="wstat-val">${latest.kg}</div>
+        <div class="wstat-lbl">kg aktuell</div>
+      </div>
+      ${bmi ? `<div class="wstat"><div class="wstat-val" style="color:${cat.color};">${bmi}</div><div class="wstat-lbl">BMI · ${cat.label}</div></div>` : '<div class="wstat"><div class="wstat-val" style="color:var(--text3);">—</div><div class="wstat-lbl">BMI (Größe eintragen)</div></div>'}
+      ${goal ? `<div class="wstat"><div class="wstat-val" style="color:${latest.kg<=goal?'var(--green)':'var(--yellow)'};">${Math.round((latest.kg-goal)*10)/10>0?'+':''}${Math.round((latest.kg-goal)*10)/10}</div><div class="wstat-lbl">kg zum Ziel (${goal}kg)</div></div>` : '<div class="wstat"><div class="wstat-val" style="color:var(--text3);">—</div><div class="wstat-lbl">Zielgewicht setzen</div></div>'}
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      ${diff!==null?`<div style="font-size:12px;color:var(--text2);">Letzte Änderung: <strong style="color:${diff<0?'var(--green)':diff>0?'var(--red)':'var(--text3)'};">${diff>0?'+':''}${diff} kg</strong></div>`:''}
+      ${total!==null?`<div style="font-size:12px;color:var(--text2);">Seit Start: <strong style="color:${total<0?'var(--green)':total>0?'var(--red)':'var(--text3)'};">${total>0?'+':''}${total} kg</strong></div>`:''}
+      <div style="font-size:12px;color:var(--text3);">Stand: ${fmtDate(latest.date)}</div>
+    </div>
+  </div>`;
+}
+
+function renderWeightChartMain(period) {
+  const wrap = document.getElementById('weight-chart-main');
+  if (!wrap || !weightLog.length) { if(wrap) wrap.innerHTML='<div style="font-size:13px;color:var(--text3);">Noch keine Daten.</div>'; return; }
+  let data = [...weightLog];
+  if (period==='7')  { const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);data=data.filter(e=>new Date(e.date)>=cutoff); }
+  if (period==='30') { const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);data=data.filter(e=>new Date(e.date)>=cutoff); }
+  if (!data.length) { wrap.innerHTML='<div style="font-size:13px;color:var(--text3);">Keine Daten in diesem Zeitraum.</div>'; return; }
+
+  const W = Math.max(wrap.clientWidth||300,300), H=120, pad=14;
+  const weights = data.map(e=>e.kg);
+  const minW = Math.min(...weights)-0.5, maxW=Math.max(...weights)+0.5, rangeW=maxW-minW||1;
+  const pts = data.map((e,i)=>({
+    x: pad+(i/Math.max(data.length-1,1))*(W-pad*2),
+    y: H-pad-((e.kg-minW)/rangeW)*(H-pad*2),
+    e
+  }));
+  const pathD = pts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaD = pathD+` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
+
+  let goalLine='';
+  const goal=settings.goalWeight;
+  if (goal&&goal>=minW&&goal<=maxW) {
+    const gy=H-pad-((goal-minW)/rangeW)*(H-pad*2);
+    goalLine=`<line x1="${pad}" y1="${gy.toFixed(1)}" x2="${W-pad}" y2="${gy.toFixed(1)}" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="${W-pad-2}" y="${(gy-4).toFixed(1)}" text-anchor="end" font-size="8.5" fill="var(--green)" font-family="Sora,sans-serif">Ziel ${goal}kg</text>`;
+  }
+  const dots=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="var(--accent)" stroke="var(--bg2)" stroke-width="1.5"/>`).join('');
+  // Y-axis labels
+  const yLabels=[minW+0.5, (minW+maxW)/2, maxW-0.5].map(v=>{
+    const y=H-pad-((v-minW)/rangeW)*(H-pad*2);
+    return `<text x="2" y="${y.toFixed(1)}" font-size="8" fill="var(--text3)" font-family="var(--mono)" dominant-baseline="middle">${v.toFixed(1)}</text>`;
+  }).join('');
+  // X labels
+  const xStep=Math.max(1,Math.floor(data.length/4));
+  const xLabels=pts.filter((_,i)=>i===0||i===pts.length-1||i%xStep===0).map(p=>`<text x="${p.x.toFixed(1)}" y="${H-1}" text-anchor="middle" font-size="8" fill="var(--text3)" font-family="Sora,sans-serif">${new Date(p.e.date+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}</text>`).join('');
+
+  wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;">
+    <defs><linearGradient id="wgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/></linearGradient></defs>
+    ${yLabels}<path d="${areaD}" fill="url(#wgrad)"/>${goalLine}
+    <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${xLabels}
+    <line x1="${pad}" y1="${H-10}" x2="${W-pad}" y2="${H-10}" stroke="var(--border)" stroke-width="1"/>
+  </svg>`;
+}
+
+function renderWeightStatsCard() {
+  const card = document.getElementById('weight-stats-card');
+  if (!card || weightLog.length < 2) { if(card) card.innerHTML=''; return; }
+  // Last 7 days avg
+  const now=new Date();
+  const w7=weightLog.filter(e=>{const d=new Date(e.date);return (now-d)/864e5<=7;});
+  const w30=weightLog.filter(e=>{const d=new Date(e.date);return (now-d)/864e5<=30;});
+  const avg7=w7.length?Math.round(w7.reduce((s,e)=>s+e.kg,0)/w7.length*10)/10:null;
+  const avg30=w30.length?Math.round(w30.reduce((s,e)=>s+e.kg,0)/w30.length*10)/10:null;
+  const minAll=Math.min(...weightLog.map(e=>e.kg));
+  const maxAll=Math.max(...weightLog.map(e=>e.kg));
+  // weekly trend
+  const wkDiff=w7.length>=2?Math.round((w7[w7.length-1].kg-w7[0].kg)*10)/10:null;
+
+  card.innerHTML=`<div class="card">
+    <div style="font-size:14px;font-weight:600;margin-bottom:13px;">📊 Statistiken</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${avg7!==null?`<div class="scard"><div class="sval" style="font-size:18px;">${avg7}</div><div class="slbl">Ø 7 Tage (kg)</div></div>`:''}
+      ${avg30!==null?`<div class="scard"><div class="sval" style="font-size:18px;">${avg30}</div><div class="slbl">Ø 30 Tage (kg)</div></div>`:''}
+      <div class="scard"><div class="sval" style="font-size:18px;color:var(--green);">${minAll}</div><div class="slbl">Tiefstwert (kg)</div></div>
+      <div class="scard"><div class="sval" style="font-size:18px;color:var(--red);">${maxAll}</div><div class="slbl">Höchstwert (kg)</div></div>
+      ${wkDiff!==null?`<div class="scard" style="grid-column:span 2;"><div class="sval" style="font-size:18px;color:${wkDiff<0?'var(--green)':wkDiff>0?'var(--red)':'var(--text3)'};">${wkDiff>0?'+':''}${wkDiff} kg</div><div class="slbl">Trend diese Woche</div></div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderWeightEntriesList() {
+  const wrap = document.getElementById('weight-entries-list');
+  if (!wrap) return;
+  if (!weightLog.length) { wrap.innerHTML='<div style="font-size:13px;color:var(--text3);">Noch keine Einträge.</div>'; return; }
+  const sorted=[...weightLog].reverse();
+  wrap.innerHTML=sorted.map(e=>{
+    const bmiE=calcBMI(e.kg);
+    const cat=bmiE?bmiCategory(bmiE):null;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <span style="font-size:15px;font-weight:700;font-family:var(--mono);">${e.kg} kg</span>
+        ${e.note?`<span style="font-size:12px;color:var(--text3);margin-left:8px;">${e.note}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${bmiE?`<span style="font-size:12px;color:${cat.color};">BMI ${bmiE}</span>`:''}
+        <span style="font-size:11px;color:var(--text3);">${fmtDate(e.date)}</span>
+        <button class="bico" onclick="deleteWeight('${e.id}')" style="padding:5px;font-size:12px;">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function renderWeightHistory() {
   const wrap = document.getElementById('weight-chart-wrap');
