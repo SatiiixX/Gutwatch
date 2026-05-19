@@ -30,7 +30,7 @@ body{background:var(--bg);color:var(--text);transition:background .25s,color .25
 #app{display:flex;flex-direction:column;height:100dvh;}
 
 /* HEADER */
-#hdr{padding:0 20px;height:calc(var(--hdrh)+var(--st));padding-top:var(--st);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
+#hdr{padding:0 16px;height:calc(var(--hdrh)+var(--st));padding-top:var(--st);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
 #hdr h1{font-size:21px;font-weight:700;letter-spacing:-.5px;}
 #hdr h1 span{color:var(--accent);}
 .hdr-r{display:flex;gap:6px;}
@@ -40,10 +40,9 @@ body{background:var(--bg);color:var(--text);transition:background .25s,color .25
 .page{
   position:absolute;inset:0;
   overflow-y:auto;overflow-x:hidden;
-  padding:20px 16px calc(var(--navh)+32px+var(--sb)) 16px;
+  padding:16px 16px calc(var(--navh)+32px+var(--sb)) 16px;
   -webkit-overflow-scrolling:touch;
-  opacity:0;
-  pointer-events:none;
+  opacity:0;pointer-events:none;
   transform:translateX(100%);
   transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .28s;
   will-change:transform,opacity;
@@ -70,7 +69,7 @@ body{background:var(--bg);color:var(--text);transition:background .25s,color .25
 .ni.act::after{width:28px;}
 
 /* CARDS */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
 .cc{cursor:pointer;transition:border-color .15s,transform .1s;}
 .cc:active{transform:scale(.99);border-color:var(--accent);}
 
@@ -217,6 +216,8 @@ select option{background:var(--bg3);}
 .insight.warn{background:linear-gradient(135deg,rgba(248,81,73,.07),rgba(210,153,34,.03));border-color:rgba(248,81,73,.22);}
 .insight.ok{background:linear-gradient(135deg,rgba(63,185,80,.07),rgba(63,185,80,.03));border-color:rgba(63,185,80,.22);}
 .insight.base{}
+.toggle.off{}
+.drink-type-btn.base{}
 .insight-icon{font-size:20px;margin-bottom:5px;}
 .insight-title{font-size:14px;font-weight:600;margin-bottom:3px;}
 .insight-text{font-size:13px;color:var(--text2);line-height:1.5;}
@@ -247,8 +248,9 @@ select option{background:var(--bg3);}
 ::-webkit-scrollbar{width:0;}
 
 /* DASHBOARD */
-#dash-goals-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.goal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;transition:border-color .15s;}
+#dash-greeting{margin-bottom:16px;}
+#dash-goals-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.goal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:border-color .15s;}
 .goal-card.cc:active{border-color:var(--accent);transform:scale(.99);}
 
 /* DRINK WIDGET */
@@ -309,7 +311,7 @@ select option{background:var(--bg3);}
       </div>
 
       <!-- GETRÄNKE WIDGET -->
-      <div class="card" id="w-drinks" style="padding:14px;margin-bottom:12px;">
+      <div class="card" id="w-drinks">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:14px;font-weight:600;">💧 Getränke heute</div>
           <button class="btn bp bsm" onclick="openDrinkModal()">+ Trinken</button>
@@ -1409,23 +1411,27 @@ function renderToday() {
     const protPct  = Math.min(100, Math.round(totalProt/protGoal*100));
     const wDiff    = latestW && goalW ? Math.round((latestW.kg-goalW)*10)/10 : null;
 
-    const goalCard = (icon, label, cur, goal2, unit, pct, col, clickFn='') =>
-      `<div class="goal-card${clickFn?` cc" onclick="${clickFn}"`:'"'}> 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:12px;color:var(--text2);">${icon} ${label}</span>
-          <span style="font-size:11px;font-family:var(--mono);color:var(--text3);">${pct}%</span>
+    const goalCard = (icon, label, cur, total, unit, pct, col, clickFn='', hasData=true) => {
+      const cls = clickFn ? 'goal-card cc' : 'goal-card';
+      const onclick = clickFn ? ` onclick="${clickFn}"` : '';
+      const valStr = hasData ? String(cur) : '—';
+      return `<div class="${cls}"${onclick}>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:500;color:var(--text2);">${icon} ${label}</span>
+          <span style="font-size:10px;font-family:var(--mono);color:${hasData&&pct>0?col:'var(--text3)'};">${hasData?pct+'%':''}</span>
         </div>
-        <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:${col};line-height:1;margin-bottom:6px;">${cur}<span style="font-size:11px;font-weight:400;color:var(--text3);"> / ${goal2}${unit}</span></div>
-        <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px;transition:width .6s ease;"></div></div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${hasData&&cur>0?col:'var(--text3)'};line-height:1;margin-bottom:8px;">${valStr}<span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:2px;">/ ${total}${unit}</span></div>
+        <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="width:${hasData?pct:0}%;height:100%;background:${col};border-radius:2px;transition:width .6s ease;"></div></div>
       </div>`;
+    };
 
     goalsRow.innerHTML =
-      goalCard('🔥','Kalorien', totalKcalAll||0, kcalGoal, 'kcal', kcalPct,
-        kcalPct>110?'var(--red)':kcalPct>90?'var(--yellow)':'var(--orange)', 'goTo(1)') +
-      goalCard('💧','Wasser', Math.round(totalWaterMl/100)/10||'0', waterGoalMl/1000, 'L', waterPct,
-        waterPct>=100?'var(--green)':waterPct>=60?'var(--accent)':'var(--yellow)') +
+      goalCard('🔥','Kalorien', totalKcalAll, kcalGoal, 'kcal', kcalPct,
+        kcalPct>110?'var(--red)':kcalPct>90?'var(--yellow)':'var(--orange)', 'goTo(1)', totalKcalAll>0) +
+      goalCard('💧','Wasser', Math.round(totalWaterMl/100)/10||0, (waterGoalMl/1000).toFixed(1), 'L', waterPct,
+        waterPct>=100?'var(--green)':waterPct>=60?'var(--accent)':'var(--yellow)', '', totalWaterMl>0) +
       goalCard('💪','Protein', totalProt, protGoal, 'g', protPct,
-        protPct>=100?'var(--green)':'var(--accent)', 'goTo(1)') +
+        protPct>=100?'var(--green)':'var(--accent)', 'goTo(1)', totalProt>0) +
       (latestW ? `<div class="goal-card cc" onclick="goTo(3)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:12px;color:var(--text2);">⚖️ Gewicht</span>
@@ -1505,7 +1511,11 @@ function renderToday() {
   // ── MEALS TODAY
   const c = document.getElementById('today-meals');
   if (!tm.length) {
-    c.innerHTML = `<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><h3>Noch keine Mahlzeiten heute</h3><p>Tippe auf + um deine erste Mahlzeit hinzuzufügen</p></div>`;
+    c.innerHTML = `<div style="text-align:center;padding:28px 16px;color:var(--text3);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36" style="margin:0 auto 10px;display:block;opacity:.3;"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px;">Noch keine Mahlzeiten</div>
+      <div style="font-size:13px;">Tippe auf <strong>+</strong> oben rechts</div>
+    </div>`;
     return;
   }
   c.innerHTML = tm.map(mealCard).join('');
@@ -2242,7 +2252,7 @@ document.getElementById('delete-api-btn').onclick = () => {
 function renderWidgetCfg() {
   const defs = [{k:'stats',l:'📊 Statistik-Karten'},{k:'kcal',l:'📈 Kalorien-Fortschritt'},{k:'risk',l:'🎯 Morgen-Prognose'},{k:'insights',l:'💡 Persönliche Insights'},{k:'favs',l:'⭐ Favoriten-Schnellzugriff'}];
   document.getElementById('widget-cfg').innerHTML = defs.map(w => `
-    <div class="srow"><div><div class="srlbl" style="font-size:13px;">${w.l}</div></div><button class="toggle${widgets[w.k]!==false?' on':''}" data-wk="${w.k}"></button></div>`).join('');
+    <div class="srow"><div><div class="srlbl" style="font-size:13px;">${w.l}</div></div><button class="toggle${widgets[w.k]!==false?' on':' off'}" data-wk="${w.k}"></button></div>`).join('');
   document.getElementById('widget-cfg').querySelectorAll('[data-wk]').forEach(btn => {
     btn.onclick = function() {
       const k = this.dataset.wk; widgets[k] = widgets[k]===false ? true : false;
@@ -2389,7 +2399,7 @@ function renderDrinkQuickBtns() {
   const wrap = document.getElementById('drink-quick-btns');
   if (!wrap) return;
   wrap.innerHTML = drinkDB.map(d => `
-    <div class="drink-type-btn${selectedDrinkId===d.id?' sel':''}" onclick="selectDrink('${d.id}')">
+    <div class="drink-type-btn${selectedDrinkId===d.id?' sel':' base'}" onclick="selectDrink('${d.id}')">
       <div style="font-size:18px;">${d.emoji}</div>
       <div style="font-size:11px;margin-top:2px;">${d.name}</div>
       <div style="font-size:10px;color:var(--text3);">${d.kcalPer100?d.kcalPer100+'kcal/dl':'0 kcal'}</div>
@@ -2507,32 +2517,35 @@ document.getElementById('dt-save-btn').onclick = () => {
 
 function renderDrinkWidget() {
   const todayEntries = getTodayDrinks();
-  const totalMl = getTodayDrinks().reduce((s,e) => s+e.ml, 0);
+  const totalMl = todayEntries.reduce((s,e) => s+e.ml, 0);
   const waterGoal = settings.waterGoalMl || 2500;
   const pct = Math.min(100, Math.round((totalMl / waterGoal) * 100));
   const kcal = getTodayDrinkKcal();
+  const fillCol = pct>=100?'var(--green)':pct>=60?'var(--accent)':'var(--yellow)';
 
   const prog = document.getElementById('drink-progress-wrap');
   if (prog) {
     prog.innerHTML = `
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
-        <span style="color:var(--text2);">${Math.round(totalMl)}ml von ${waterGoal}ml Ziel</span>
-        <span style="font-family:var(--mono);color:${pct>=100?'var(--green)':'var(--text3)'};">${pct}% ${pct>=100?'🎉':''}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:${totalMl>0?fillCol:'var(--text3)'};">
+          ${totalMl>=1000?(totalMl/1000).toFixed(1)+'L':Math.round(totalMl)+'ml'}
+        </span>
+        <span style="font-size:11px;color:var(--text3);">${pct}% von ${(waterGoal/1000).toFixed(1)}L${pct>=100?' 🎉':''}</span>
       </div>
-      <div class="drink-progress"><div class="drink-progress-fill" style="width:${pct}%;background:${pct>=100?'var(--green)':pct>=60?'var(--accent)':'var(--yellow)'};"></div></div>
-      ${kcal>0?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">+${kcal} kcal aus Getränken</div>`:''}`;
+      <div class="drink-progress"><div class="drink-progress-fill" style="width:${pct}%;background:${fillCol};"></div></div>
+      ${kcal>0?`<div style="font-size:11px;color:var(--text3);margin-top:5px;">+${kcal} kcal aus Getränken</div>`:''}`;
   }
 
   const list = document.getElementById('drink-today-list');
   if (list) {
     if (!todayEntries.length) {
-      list.innerHTML = `<div style="font-size:13px;color:var(--text3);">Noch nichts eingetragen — tippe auf + Trinken</div>`;
+      list.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:4px 0;">Noch nichts eingetragen</div>`;
     } else {
       list.innerHTML = todayEntries.slice(0,8).map(e => {
         const d = drinkDB.find(x => x.id === e.drinkId);
         return `<div class="drink-chip" onclick="deleteDrinkEntry('${e.id}')">
-          ${d?.emoji||'💧'} ${d?.name||'?'} <span style="color:var(--text3);">${e.ml}ml</span>
-          <span style="opacity:.4;font-size:10px;margin-left:2px;">✕</span>
+          ${d?.emoji||'💧'} ${d?.name||'?'} <span style="color:var(--text3);margin-left:3px;">${e.ml}ml</span>
+          <span style="opacity:.35;font-size:10px;margin-left:4px;">✕</span>
         </div>`;
       }).join('');
     }
