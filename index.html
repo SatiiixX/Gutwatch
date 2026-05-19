@@ -275,9 +275,13 @@ select option{background:var(--bg3);}
           <div id="sym-prompt-btns" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
         </div>
       </div>
-      <div class="s3" id="w-stats">
+      <div class="sgrid" id="w-stats">
         <div class="scard"><div class="sval" id="sw-kcal">—</div><div class="slbl">kcal heute</div></div>
         <div class="scard"><div class="sval" id="sw-meals">0</div><div class="slbl">Mahlzeiten</div></div>
+        <div class="scard cc" id="sw-weight-card" onclick="openWeightModal()">
+          <div class="sval" id="sw-weight">—</div>
+          <div class="slbl">⚖️ Gewicht (kg)</div>
+        </div>
         <div class="scard"><div class="sval" id="sw-streak">0</div><div class="slbl">🔥 Streak</div></div>
       </div>
       <div class="card" id="w-kcal" style="padding:14px;margin-bottom:12px;">
@@ -365,22 +369,39 @@ select option{background:var(--bg3);}
         <div id="widget-cfg"></div>
       </div>
       <div class="card">
-        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">🎯 Tagesziele</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">🎯 Tagesziele & Körperdaten</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;margin-top:10px;">
           <div><label>Kalorien</label><input type="number" id="kcal-inp" placeholder="2000"></div>
           <div><label>Protein (g)</label><input type="number" id="prot-inp" placeholder="150"></div>
+          <div><label>Zielgewicht (kg)</label><input type="number" id="goal-weight-inp" placeholder="75" step="0.1"></div>
+          <div><label>Körpergröße (cm)</label><input type="number" id="height-inp" placeholder="175"></div>
         </div>
         <button class="btn bp bsm bfull" id="save-goals">Ziele speichern</button>
       </div>
+      <div class="card" id="weight-history-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">
+          <div style="font-size:14px;font-weight:600;">⚖️ Gewichtsverlauf</div>
+          <button class="btn bp bsm" onclick="openWeightModal()">+ Eintragen</button>
+        </div>
+        <div id="weight-chart-wrap" style="margin-bottom:10px;"></div>
+        <div id="weight-bmi-info" style="font-size:13px;color:var(--text2);"></div>
+      </div>
       <div class="card">
-        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">🤖 Gemini API-Schlüssel</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:11px;margin-top:6px;">
-          Für KI-gestützte Nährwert- &amp; Histaminanalyse. Schlüssel wird nur lokal auf deinem Gerät gespeichert.
-          Ohne Schlüssel läuft GutWatch offline mit der eingebauten Histamin-DB.
+        <div style="font-size:14px;font-weight:600;margin-bottom:10px;">🤖 Gemini API-Schlüssel</div>
+        <div id="api-setup-hint" style="background:var(--bg3);border-radius:var(--rsm);padding:12px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6;">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px;">So bekommst du deinen Key:</div>
+          1. Gehe zu <strong>aistudio.google.com</strong><br>
+          2. Klicke auf „Get API Key" → „Create API key"<br>
+          3. Key kopieren und hier einfügen<br>
+          <div style="margin-top:6px;font-size:12px;color:var(--text3);">🔒 Wird ausschließlich lokal auf deinem Gerät gespeichert — nie übertragen.</div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="password" id="api-inp" placeholder="AIza..." style="flex:1;">
-          <button class="btn bp bsm" id="save-api">OK</button>
+          <input type="password" id="api-inp" placeholder="AIzaSy…" style="flex:1;" autocomplete="off">
+          <button class="btn bp bsm" id="save-api">Speichern</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn bg bsm" id="show-api-btn" style="flex:1;">👁 Anzeigen</button>
+          <button class="btn bd bsm" id="delete-api-btn" style="flex:1;">🗑 Löschen</button>
         </div>
         <div id="api-status" style="font-size:12px;"></div>
       </div>
@@ -507,6 +528,31 @@ select option{background:var(--bg3);}
     <div id="planer-slots"></div>
     <div id="planer-sum" style="margin-top:12px;"></div>
     <button class="btn bg bfull" style="margin-top:10px;" onclick="closeM('m-planer')">Schließen</button>
+  </div>
+</div>
+
+<!-- MODAL: GEWICHT -->
+<div class="mo" id="m-weight">
+  <div class="md">
+    <div class="mhandle"></div>
+    <div class="mtitle">⚖️ Gewicht eintragen</div>
+    <div class="ig">
+      <label>Gewicht (kg)</label>
+      <input type="number" id="weight-inp" placeholder="75.5" step="0.1" style="font-size:22px;font-weight:700;text-align:center;">
+    </div>
+    <div class="ig">
+      <label>Datum</label>
+      <input type="date" id="weight-date-inp">
+    </div>
+    <div class="ig">
+      <label>Notiz (optional)</label>
+      <input type="text" id="weight-note-inp" placeholder="z.B. morgens nüchtern">
+    </div>
+    <div id="weight-bmi-preview" style="font-size:13px;color:var(--text2);margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:var(--rsm);display:none;"></div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn bg bfull" onclick="closeM('m-weight')">Abbrechen</button>
+      <button class="btn bp bfull" id="weight-save-btn">Speichern</button>
+    </div>
   </div>
 </div>
 
@@ -769,7 +815,8 @@ const HDB = {
 // ═══════════════════════════════════════════
 const DB = {
   get(k,d=null){try{const v=localStorage.getItem('gw3_'+k);return v!==null?JSON.parse(v):d;}catch{return d;}},
-  set(k,v){localStorage.setItem('gw3_'+k,JSON.stringify(v));}
+  set(k,v){localStorage.setItem('gw3_'+k,JSON.stringify(v));},
+  del(k){localStorage.removeItem('gw3_'+k);}
 };
 let meals     = DB.get('meals',[]);
 let symptoms  = DB.get('symptoms',[]);
@@ -1205,6 +1252,10 @@ function renderToday() {
   const tm = meals.filter(m => m.date === todayStr());
   document.getElementById('sw-meals').textContent = tm.length;
   document.getElementById('sw-streak').textContent = calcStreak();
+  // Weight card
+  const todayWeight = weightLog.find(e => e.date === todayStr())
+    || (weightLog.length ? weightLog[weightLog.length-1] : null);
+  document.getElementById('sw-weight').textContent = todayWeight ? todayWeight.kg : '—';
   const totalKcal = tm.reduce((a,m) => a + (m.nutrition?.kcal||0), 0);
   document.getElementById('sw-kcal').textContent = totalKcal || '—';
 
@@ -1909,20 +1960,68 @@ function renderSettings() {
   document.getElementById('prot-inp').value = settings.protein || 150;
   const k = DB.get('apiKey','');
   document.getElementById('api-inp').value = k;
-  document.getElementById('api-status').innerHTML = k ? `<span style="color:var(--green);">✅ Gemini aktiv (${k.slice(0,8)}...)</span>` : `<span style="color:var(--text3);">Kein Schlüssel — Offline-Modus aktiv ✓</span>`;
-  renderWidgetCfg(); renderBrands();
+  // Never show the key itself in the UI
+  document.getElementById('api-status').innerHTML = k
+    ? `<span style="color:var(--green);">✅ Gemini-KI aktiv</span>`
+    : `<span style="color:var(--text3);">Kein Schlüssel hinterlegt — Offline-Modus aktiv ✓</span>`;
+  // Show setup hint only if no key
+  const hint = document.getElementById('api-setup-hint');
+  if (hint) hint.style.display = k ? 'none' : 'block';
+  // Don't prefill input with key for security
+  document.getElementById('api-inp').value = '';
+  document.getElementById('api-inp').placeholder = k ? '••••••••••••••••••••' : 'AIzaSy…';
+  renderWidgetCfg(); renderBrands(); renderWeightHistory();
+  document.getElementById('goal-weight-inp').value = settings.goalWeight || '';
+  document.getElementById('height-inp').value = settings.height || '';
 }
 document.getElementById('dark-tog').onclick = () => { settings.dark=!settings.dark; DB.set('settings',settings); applyTheme(); };
 document.getElementById('sym-rem-tog').onclick = function() { settings.symRem=!settings.symRem; DB.set('settings',settings); this.className='toggle'+(settings.symRem?' on':''); };
 document.getElementById('save-goals').onclick = () => {
   settings.kcal = +document.getElementById('kcal-inp').value || 2000;
   settings.protein = +document.getElementById('prot-inp').value || 150;
-  DB.set('settings', settings); toast('Ziele gespeichert ✓','ok');
+  const gw = parseFloat(document.getElementById('goal-weight-inp').value);
+  const ht = parseFloat(document.getElementById('height-inp').value);
+  if (gw && gw > 20 && gw < 300) settings.goalWeight = gw;
+  if (ht && ht > 100 && ht < 250) settings.height = ht;
+  DB.set('settings', settings);
+  toast('Ziele gespeichert ✓','ok');
+  renderWeightHistory();
 };
 document.getElementById('save-api').onclick = () => {
   const k = document.getElementById('api-inp').value.trim();
-  if (k && k.length < 10) { toast('Schlüssel zu kurz','err'); return; }
-  DB.set('apiKey', k); renderSettings(); toast(k ? 'Gemini-Schlüssel gespeichert ✓' : 'Entfernt','ok');
+  if (!k) { toast('Bitte Key eingeben','err'); return; }
+  if (k.length < 10) { toast('Schlüssel zu kurz','err'); return; }
+  if (!k.startsWith('AIza') && !k.startsWith('sk-')) {
+    toast('Ungültiges Format — Gemini Keys starten mit AIza…','err'); return;
+  }
+  DB.set('apiKey', k);
+  document.getElementById('api-inp').value = '';
+  document.getElementById('api-inp').type = 'password';
+  document.getElementById('show-api-btn').textContent = '👁 Anzeigen';
+  renderSettings();
+  toast('Gemini-Schlüssel gespeichert ✓', 'ok');
+};
+
+document.getElementById('show-api-btn').onclick = () => {
+  const inp = document.getElementById('api-inp');
+  const btn = document.getElementById('show-api-btn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈 Verbergen';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁 Anzeigen';
+  }
+};
+
+document.getElementById('delete-api-btn').onclick = () => {
+  if (!confirm('API-Schlüssel wirklich löschen? Die KI-Analyse wird deaktiviert.')) return;
+  DB.del('apiKey');
+  document.getElementById('api-inp').value = '';
+  document.getElementById('api-inp').type = 'password';
+  document.getElementById('show-api-btn').textContent = '👁 Anzeigen';
+  renderSettings();
+  toast('Schlüssel gelöscht — Offline-Modus aktiv', 'ok');
 };
 
 function renderWidgetCfg() {
@@ -1939,7 +2038,7 @@ function renderWidgetCfg() {
 }
 
 document.getElementById('export-btn').onclick = () => {
-  const data = {meals,symptoms,triggers,brands,favorites,checkHist,settings,widgets,exportDate:new Date().toISOString(),version:'3.0'};
+  const data = {meals,symptoms,triggers,brands,favorites,checkHist,weightLog,settings,widgets,exportDate:new Date().toISOString(),version:'3.1'};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'gutwatch_v3_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
@@ -1956,6 +2055,7 @@ document.getElementById('imp-file').onchange = e => {
       if (d.symptoms) { symptoms=d.symptoms; DB.set('symptoms',symptoms); }
       if (d.triggers) { triggers=d.triggers; DB.set('triggers',triggers); }
       if (d.brands) { brands=d.brands; DB.set('brands',brands); }
+      if (d.weightLog) { weightLog=d.weightLog; DB.set('weightLog',weightLog); }
       if (d.favorites) { favorites=d.favorites; DB.set('favorites',favorites); }
       if (d.checkHist) { checkHist=d.checkHist; DB.set('checkHist',checkHist); }
       if (d.settings) { settings={...settings,...d.settings}; DB.set('settings',settings); }
@@ -2019,11 +2119,190 @@ document.getElementById('br-save').onclick = () => {
 };
 
 // ═══════════════════════════════════════════
+// GEWICHT
+// ═══════════════════════════════════════════
+let weightLog = DB.get('weightLog', []); // [{id, date, kg, note}]
+
+function openWeightModal() {
+  document.getElementById('weight-inp').value = '';
+  document.getElementById('weight-date-inp').value = todayStr();
+  document.getElementById('weight-note-inp').value = '';
+  document.getElementById('weight-bmi-preview').style.display = 'none';
+  openM('m-weight');
+}
+
+function calcBMI(kg) {
+  const h = (settings.height || 0) / 100;
+  if (!h) return null;
+  return Math.round((kg / (h * h)) * 10) / 10;
+}
+
+function bmiCategory(bmi) {
+  if (bmi < 18.5) return {label: 'Untergewicht', color: 'var(--yellow)'};
+  if (bmi < 25)   return {label: 'Normalgewicht', color: 'var(--green)'};
+  if (bmi < 30)   return {label: 'Übergewicht', color: 'var(--yellow)'};
+  return           {label: 'Adipositas', color: 'var(--red)'};
+}
+
+// Live BMI preview while typing
+document.getElementById('weight-inp').addEventListener('input', function() {
+  const kg = parseFloat(this.value);
+  const preview = document.getElementById('weight-bmi-preview');
+  if (!kg || kg < 20 || kg > 300) { preview.style.display = 'none'; return; }
+  const bmi = calcBMI(kg);
+  const goal = settings.goalWeight;
+  let html = '';
+  if (bmi) {
+    const cat = bmiCategory(bmi);
+    html += `<span>BMI: <strong style="color:${cat.color};">${bmi} — ${cat.label}</strong></span>`;
+  }
+  if (goal && kg) {
+    const diff = Math.round((kg - goal) * 10) / 10;
+    const sign = diff > 0 ? '+' : '';
+    html += `${html?' · ':''}Zum Ziel: <strong style="color:${diff>0?'var(--yellow)':'var(--green)'};">${sign}${diff} kg</strong>`;
+  }
+  if (html) { preview.innerHTML = html; preview.style.display = 'block'; }
+  else preview.style.display = 'none';
+});
+
+document.getElementById('weight-save-btn').onclick = () => {
+  const kg = parseFloat(document.getElementById('weight-inp').value);
+  if (!kg || kg < 20 || kg > 300) { toast('Ungültiges Gewicht', 'err'); return; }
+  const date = document.getElementById('weight-date-inp').value || todayStr();
+  const note = document.getElementById('weight-note-inp').value.trim();
+  // Replace existing entry for same date
+  weightLog = weightLog.filter(e => e.date !== date);
+  weightLog.push({id: genId(), date, kg, note, createdAt: new Date().toISOString()});
+  weightLog.sort((a, b) => a.date.localeCompare(b.date));
+  DB.set('weightLog', weightLog);
+  toast('Gewicht gespeichert ✓', 'ok');
+  closeM('m-weight');
+  renderToday();
+  if (curPg === 4) renderWeightHistory();
+};
+
+function renderWeightHistory() {
+  const wrap = document.getElementById('weight-chart-wrap');
+  const info = document.getElementById('weight-bmi-info');
+  if (!wrap) return;
+
+  if (!weightLog.length) {
+    wrap.innerHTML = '<div style="font-size:13px;color:var(--text3);">Noch keine Einträge. Tippe auf + Eintragen.</div>';
+    if (info) info.innerHTML = '';
+    return;
+  }
+
+  // Latest weight + BMI
+  const latest = weightLog[weightLog.length - 1];
+  const bmi = calcBMI(latest.kg);
+  const goal = settings.goalWeight;
+  if (info) {
+    const cat = bmi ? bmiCategory(bmi) : null;
+    let infoHtml = `<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">`;
+    infoHtml += `<div><div style="font-size:22px;font-weight:700;font-family:var(--mono);">${latest.kg} kg</div><div style="font-size:11px;color:var(--text3);">Aktuell (${fmtDate(latest.date)})</div></div>`;
+    if (bmi) infoHtml += `<div><div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${cat.color};">${bmi}</div><div style="font-size:11px;color:var(--text3);">BMI · ${cat.label}</div></div>`;
+    if (goal) {
+      const diff = Math.round((latest.kg - goal) * 10) / 10;
+      const sign = diff > 0 ? '+' : '';
+      infoHtml += `<div><div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${diff>0?'var(--yellow)':'var(--green)'};">${sign}${diff}</div><div style="font-size:11px;color:var(--text3);">kg zum Ziel (${goal} kg)</div></div>`;
+    }
+    // Trend: difference from first entry
+    if (weightLog.length >= 2) {
+      const first = weightLog[0];
+      const total = Math.round((latest.kg - first.kg) * 10) / 10;
+      const sign = total > 0 ? '+' : '';
+      infoHtml += `<div><div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${total<0?'var(--green)':'var(--text2)'};">${sign}${total}</div><div style="font-size:11px;color:var(--text3);">kg seit Start</div></div>`;
+    }
+    infoHtml += `</div>`;
+    info.innerHTML = infoHtml;
+  }
+
+  // Draw SVG chart
+  const last30 = weightLog.slice(-30);
+  const W = Math.max(wrap.clientWidth || 300, 300);
+  const H = 90;
+  const pad = 10;
+  const weights = last30.map(e => e.kg);
+  const minW = Math.min(...weights) - 1;
+  const maxW = Math.max(...weights) + 1;
+  const rangeW = maxW - minW || 1;
+
+  const pts = last30.map((e, i) => {
+    const x = pad + (i / Math.max(last30.length - 1, 1)) * (W - pad * 2);
+    const y = H - pad - ((e.kg - minW) / rangeW) * (H - pad * 2);
+    return {x, y, e};
+  });
+
+  // Gradient path
+  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
+
+  // Goal line
+  let goalLine = '';
+  if (goal && goal >= minW && goal <= maxW) {
+    const gy = H - pad - ((goal - minW) / rangeW) * (H - pad * 2);
+    goalLine = `<line x1="${pad}" y1="${gy.toFixed(1)}" x2="${W-pad}" y2="${gy.toFixed(1)}" stroke="var(--green)" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+      <text x="${W-pad-2}" y="${(gy-3).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--green)" font-family="Sora,sans-serif">Ziel ${goal}kg</text>`;
+  }
+
+  const dotsSvg = pts.map(p =>
+    `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--accent)" stroke="var(--bg2)" stroke-width="1.5"/>`
+  ).join('');
+
+  // Labels: first, last, min, max
+  const labelPts = [pts[0], pts[pts.length-1]];
+  const labelsSvg = labelPts.map(p =>
+    `<text x="${p.x.toFixed(1)}" y="${(p.y-6).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="var(--text2)" font-family="var(--mono)">${p.e.kg}</text>`
+  ).join('');
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;">
+    <defs>
+      <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    <path d="${areaD}" fill="url(#wg)"/>
+    ${goalLine}
+    <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dotsSvg}
+    ${labelsSvg}
+    <line x1="${pad}" y1="${H-pad+2}" x2="${W-pad}" y2="${H-pad+2}" stroke="var(--border)" stroke-width="1"/>
+  </svg>`;
+
+  // Recent entries list
+  const recent = [...weightLog].reverse().slice(0, 7);
+  wrap.innerHTML += `<div style="margin-top:12px;">${recent.map(e => {
+    const bmiE = calcBMI(e.kg);
+    const cat = bmiE ? bmiCategory(bmiE) : null;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <span style="font-size:14px;font-weight:600;font-family:var(--mono);">${e.kg} kg</span>
+        ${e.note ? `<span style="font-size:12px;color:var(--text3);margin-left:8px;">${e.note}</span>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${bmiE ? `<span style="font-size:12px;color:${cat.color};">BMI ${bmiE}</span>` : ''}
+        <span style="font-size:11px;color:var(--text3);">${fmtDate(e.date)}</span>
+        <button class="bico" onclick="deleteWeight('${e.id}')" style="padding:5px;font-size:12px;">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function deleteWeight(id) {
+  weightLog = weightLog.filter(e => e.id !== id);
+  DB.set('weightLog', weightLog);
+  renderWeightHistory();
+  renderToday();
+  toast('Eintrag gelöscht');
+}
+
+// ═══════════════════════════════════════════
 // ONBOARDING & INIT
 // ═══════════════════════════════════════════
-// Force-set Gemini key if empty or old Anthropic key
-if (!DB.get('apiKey','') || DB.get('apiKey','').startsWith('sk-')) {
-  DB.set('apiKey', 'AIzaSyAa6vFHjL6HNqKkcrL9oMPzibOdRcudYP4');
+// Kein hardcodierter Key — Nutzer trägt ihn selbst in den Einstellungen ein
+if (DB.get('apiKey','').startsWith('sk-')) {
+  DB.del('apiKey'); // Alten Anthropic-Key entfernen falls vorhanden
 }
 const onb = document.getElementById('onb');
 if (!DB.get('onbDone', false)) {
